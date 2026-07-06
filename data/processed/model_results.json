@@ -1,0 +1,61 @@
+{
+  "n_receipts": 76277,
+  "n_customers": 16994,
+  "test_receipts": 15215,
+  "test_customers": 3399,
+  "auc_hgb": 0.8012,
+  "ap_hgb": 0.6997,
+  "auc_lr": 0.7398,
+  "brier_hgb": 0.1754,
+  "lift_top_decile": 2.1,
+  "conv_overall_test": 0.3861,
+  "conv_match": 0.6596,
+  "conv_mismatch": 0.3559,
+  "ci_match": [
+    0.6357,
+    0.6835
+  ],
+  "n_match": 1513,
+  "uplift_pp": 27.35,
+  "uplift_rel": 0.7083,
+  "conv_best_single_offer": 0.6279,
+  "best_single_offer_label": "Desc. R$2 (mín. R$10) - 10d - 4ch",
+  "policy_expected_conv": 0.631,
+  "total_reward": 162426.0,
+  "blind_reward": 48216.0,
+  "median_window_spend_converted": 31.98,
+  "funnel_by_type": [
+    {
+      "offer_type": "bogo",
+      "enviadas": 30499,
+      "taxa_view": 0.8279,
+      "taxa_conversao": 0.3587,
+      "taxa_cega": 0.1495
+    },
+    {
+      "offer_type": "discount",
+      "enviadas": 30543,
+      "taxa_view": 0.6997,
+      "taxa_conversao": 0.4036,
+      "taxa_cega": 0.1727
+    },
+    {
+      "offer_type": "informational",
+      "enviadas": 15235,
+      "taxa_view": 0.6529,
+      "taxa_conversao": 0.3908,
+      "taxa_cega": 0.0
+    }
+  ],
+  "reco_share": {
+    "Desc. R$2 (mín. R$10) - 10d - 4ch": 0.6545,
+    "Informativa - 3d - 3ch": 0.2685,
+    "Desc. R$3 (mín. R$7) - 7d - 4ch": 0.0396,
+    "Informativa - 4d - 3ch": 0.0281,
+    "BOGO R$5 - 5d - 4ch": 0.0047,
+    "BOGO R$10 - 7d - 3ch": 0.0023,
+    "BOGO R$10 - 5d - 4ch": 0.002,
+    "BOGO R$5 - 7d - 3ch": 0.0001,
+    "Desc. R$2 (mín. R$10) - 7d - 3ch": 0.0001
+  }
+}

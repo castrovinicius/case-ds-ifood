@@ -1,0 +1,8 @@
+# Ambiente com Python 3.12
+pyspark==4.1.2
+pandas==3.0.3
+pyarrow==24.0.0
+scikit-learn==1.9.0
+matplotlib==3.11.0
+jupyter==1.1.1
+ruff==0.15.20

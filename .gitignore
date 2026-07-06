@@ -1,0 +1,13 @@
+# ambiente
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# dados (ver README para download)
+ds-technical-evaluation-data/
+*.tar.gz
+
+# spark local
+spark-warehouse/
+derby.log
+metastore_db/

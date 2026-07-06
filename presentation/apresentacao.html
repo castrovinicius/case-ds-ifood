@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distribuição inteligente de ofertas - Case iFood</title>
+<style>
+  :root {
+    --accent: #ea1d2c;
+    --ink: #0b0b0b;
+    --ink-soft: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --surface: #fcfcfb;
+    --page: #f4f3f0;
+    --blue: #2a78d6;
+    --blue-light: #86b6ef;
+    --aqua: #1baf7a;
+    --yellow: #eda100;
+    --gray-bar: #c3c2b7;
+    --gray-dark: #898781;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-snap-type: y mandatory; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--page);
+  }
+  .slide {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem clamp(1.5rem, 8vw, 8rem);
+    position: relative;
+  }
+  .slide + .slide { border-top: 1px solid var(--grid); }
+  .kicker {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: .85rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: .9rem;
+  }
+  h1 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.15; max-width: 22ch; }
+  h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1.2; margin-bottom: 1.6rem; max-width: 30ch; }
+  .lead { color: var(--ink-soft); font-size: 1.1rem; max-width: 62ch; margin-top: 1.1rem; line-height: 1.55; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-top: 2.4rem; }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--grid);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+  }
+  .tile .num { font-size: 1.9rem; font-weight: 750; letter-spacing: -.02em; }
+  .tile .num.accent { color: var(--accent); }
+  .tile .cap { color: var(--muted); font-size: .85rem; margin-top: .3rem; line-height: 1.35; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; margin-top: .6rem; }
+  @media screen and (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--grid);
+    border-radius: 14px;
+    padding: 1.4rem 1.5rem;
+  }
+  .panel h3 { font-size: 1.02rem; margin-bottom: .9rem; }
+  .panel p { color: var(--ink-soft); font-size: .95rem; line-height: 1.5; }
+  svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .note { color: var(--muted); font-size: .8rem; margin-top: 1.4rem; line-height: 1.45; max-width: 75ch; }
+  ol.steps { list-style: none; counter-reset: s; margin-top: .4rem; }
+  ol.steps li { counter-increment: s; display: flex; gap: 1rem; padding: .85rem 0; align-items: baseline; }
+  ol.steps li + li { border-top: 1px solid var(--grid); }
+  ol.steps li::before {
+    content: counter(s);
+    flex: 0 0 1.9rem; height: 1.9rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--accent); color: #fff;
+    font-weight: 700; font-size: .9rem;
+    border-radius: 50%;
+    align-self: flex-start;
+  }
+  ol.steps b { display: block; margin-bottom: .15rem; }
+  ol.steps span { color: var(--ink-soft); font-size: .95rem; line-height: 1.45; }
+  .footer-tag { position: absolute; bottom: 1.2rem; left: clamp(1.5rem, 8vw, 8rem); color: var(--muted); font-size: .75rem; }
+  .pageno { position: absolute; bottom: 1.2rem; right: clamp(1.5rem, 8vw, 8rem); color: var(--muted); font-size: .75rem; }
+  .dots { position: fixed; right: 1.1rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: .55rem; z-index: 10; }
+  .dots a { width: .55rem; height: .55rem; border-radius: 50%; background: var(--gray-bar); display: block; }
+  .dots a.on { background: var(--accent); }
+  @media print {
+    @page { size: A4 landscape; margin: 0; }
+    html { scroll-snap-type: none; }
+    .slide { page-break-after: always; min-height: auto; padding: 2rem 3.4rem; zoom: 0.72; }
+    .dots { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="dots" aria-label="navegação">
+  <a href="#s1" class="on"></a><a href="#s2"></a><a href="#s3"></a><a href="#s4"></a><a href="#s5"></a>
+</nav>
+
+<!-- SLIDE 1 - contexto -->
+<section class="slide" id="s1">
+  <div class="kicker">Case Data Science · iFood</div>
+  <h1>A oferta certa, para o cliente certo</h1>
+  <p class="lead">
+    Hoje os cupons são distribuídos de forma uniforme: cada cliente recebe qualquer uma das
+    10 ofertas do portfólio, com a mesma chance. Analisamos um teste de 30 dias para responder:
+    <b>quanto ganhamos se cada envio for escolhido para o cliente que o recebe?</b>
+  </p>
+  <div class="tiles">
+    <div class="tile"><div class="num">17 mil</div><div class="cap">clientes acompanhados por 30 dias</div></div>
+    <div class="tile"><div class="num">76 mil</div><div class="cap">ofertas enviadas em 6 ondas</div></div>
+    <div class="tile"><div class="num">306 mil</div><div class="cap">eventos de compra, recebimento e visualização</div></div>
+    <div class="tile"><div class="num accent">38%</div><div class="cap">dos envios convertem com a distribuição atual</div></div>
+  </div>
+  <div class="footer-tag">Distribuição inteligente de ofertas</div>
+  <div class="pageno">1 / 5</div>
+</section>
+
+<!-- SLIDE 2 - diagnóstico -->
+<section class="slide" id="s2">
+  <div class="kicker">O que os dados mostram</div>
+  <h2>Enviar a oferta errada custa caro - duas vezes</h2>
+  <div class="cols">
+    <div class="panel">
+      <h3>1 · A resposta varia muito entre ofertas - e entre clientes</h3>
+      <svg viewBox="0 0 460 240" role="img" aria-label="Taxa de conversão das 10 ofertas, de 17% a 60%">
+        <!-- grid -->
+        <line x1="120" y1="10" x2="120" y2="212" stroke="#c3c2b7" stroke-width="1"/>
+        <!-- bars: 10 ofertas, conversão de 60,2% a 17,0% (escala: 100% = 320px) -->
+        <g font-size="11" fill="#52514e">
+          <rect x="120" y="14"  width="193" height="12" rx="3" fill="#1baf7a"/>
+          <text x="319" y="24">60% · desconto leve, 10 dias</text>
+          <rect x="120" y="34"  width="182" height="12" rx="3" fill="#1baf7a"/>
+          <rect x="120" y="54"  width="153" height="12" rx="3" fill="#eda100"/>
+          <rect x="120" y="74"  width="148" height="12" rx="3" fill="#2a78d6"/>
+          <rect x="120" y="94"  width="116" height="12" rx="3" fill="#2a78d6"/>
+          <rect x="120" y="114" width="108" height="12" rx="3" fill="#2a78d6"/>
+          <rect x="120" y="134" width="97"  height="12" rx="3" fill="#eda100"/>
+          <rect x="120" y="154" width="88"  height="12" rx="3" fill="#1baf7a"/>
+          <rect x="120" y="174" width="88"  height="12" rx="3" fill="#2a78d6"/>
+          <rect x="120" y="194" width="54"  height="12" rx="3" fill="#1baf7a"/>
+          <text x="180" y="204">17% · desconto exigente, só 2 canais</text>
+        </g>
+        <g font-size="10.5" fill="#898781" text-anchor="end">
+          <text x="112" y="24">melhor oferta</text>
+          <text x="112" y="204">pior oferta</text>
+        </g>
+        <g font-size="10" fill="#898781">
+          <circle cx="124" cy="228" r="4" fill="#2a78d6"/><text x="132" y="232">compre-1-leve-2</text>
+          <circle cx="234" cy="228" r="4" fill="#1baf7a"/><text x="242" y="232">desconto</text>
+          <circle cx="318" cy="228" r="4" fill="#eda100"/><text x="326" y="232">informativa</text>
+        </g>
+      </svg>
+      <p style="margin-top:.6rem">A conversão vai de <b>17% a 60%</b> conforme a oferta - e a
+      melhor escolha muda com o perfil e o momento de cada cliente.</p>
+    </div>
+    <div class="panel">
+      <h3>2 · Parte da verba não influencia ninguém</h3>
+      <svg viewBox="0 0 460 120" role="img" aria-label="30% dos descontos pagos sem o cliente ver a oferta">
+        <rect x="10" y="30" width="440" height="34" rx="6" fill="#e1e0d9"/>
+        <rect x="10" y="30" width="130" height="34" rx="6" fill="#ea1d2c"/>
+        <text x="20" y="52" font-size="14" font-weight="700" fill="#ffffff">R$ 48 mil</text>
+        <text x="150" y="52" font-size="13" fill="#52514e">de R$ 162 mil pagos em descontos no teste</text>
+        <text x="10" y="94" font-size="12" fill="#52514e">30% dos descontos foram ativados <tspan font-weight="700">sem o cliente ter visto a oferta</tspan>:</text>
+        <text x="10" y="110" font-size="12" fill="#52514e">ele compraria de qualquer forma - a verba não mudou o comportamento.</text>
+      </svg>
+      <p style="margin-top:.6rem">Distribuir melhor não é só converter mais: é <b>parar de pagar
+      desconto onde ele não muda a decisão</b> do cliente.</p>
+    </div>
+  </div>
+  <div class="pageno">2 / 5</div>
+</section>
+
+<!-- SLIDE 3 - solução -->
+<section class="slide" id="s3">
+  <div class="kicker">A solução</div>
+  <h2>Um modelo que estima a chance de resposta de cada cliente a cada oferta</h2>
+  <div class="cols">
+    <ol class="steps">
+      <li><div><b>Aprende com o comportamento</b>
+        <span>Para cada envio do teste, o modelo vê o que o cliente fez antes - frequência e valor
+        de compras, quando comprou pela última vez, como reagiu a ofertas anteriores - junto com o
+        perfil e as características da oferta.</span></div></li>
+      <li><div><b>Estima a chance de conversão para as 10 ofertas</b>
+        <span>Para qualquer cliente, o modelo calcula a probabilidade de resposta a cada uma das
+        10 ofertas do portfólio.</span></div></li>
+      <li><div><b>Recomenda a melhor oferta para cada envio</b>
+        <span>A régua de decisão é transparente e ajustável: hoje maximiza conversão; com dados de
+        margem, passa a maximizar valor (ganho − custo do desconto).</span></div></li>
+    </ol>
+    <div class="panel">
+      <h3>É confiável?</h3>
+      <div class="tiles" style="margin-top:.6rem; grid-template-columns: 1fr 1fr;">
+        <div class="tile"><div class="num">8 de 10</div><div class="cap">vezes o modelo ordena corretamente quem converte (AUC 0,80), medido em clientes que ele nunca viu</div></div>
+        <div class="tile"><div class="num">2,1×</div><div class="cap">mais conversão no grupo que o modelo aponta como mais propenso vs a média</div></div>
+      </div>
+      <p style="margin-top:1rem">As probabilidades são <b>calibradas</b>: quando o modelo diz 60%
+      de chance, cerca de 60% convertem de fato - o que permite usá-las em contas de negócio
+      (projeções de verba e retorno).</p>
+    </div>
+  </div>
+  <div class="pageno">3 / 5</div>
+</section>
+
+<!-- SLIDE 4 - resultados -->
+<section class="slide" id="s4">
+  <div class="kicker">Resultado</div>
+  <h2>Enviar a oferta recomendada aumenta a conversão em 71%</h2>
+  <div class="cols">
+    <div class="panel" style="grid-column: span 1;">
+      <svg viewBox="0 0 470 190" role="img" aria-label="Conversão: política atual 38,6%, melhor oferta única 62,8%, oferta personalizada 66,0%">
+        <!-- escala: 100% = 300px, x0=145 -->
+        <g font-size="12.5">
+          <text x="136" y="36" text-anchor="end" fill="#52514e">Hoje (aleatório)</text>
+          <rect x="145" y="24" width="116" height="20" rx="4" fill="#898781"/>
+          <text x="269" y="39" font-weight="700" fill="#0b0b0b">38,6%</text>
+
+          <text x="136" y="96" text-anchor="end" fill="#52514e">Melhor oferta única</text>
+          <rect x="145" y="84" width="188" height="20" rx="4" fill="#86b6ef"/>
+          <text x="341" y="99" font-weight="700" fill="#0b0b0b">62,8%</text>
+
+          <text x="136" y="156" text-anchor="end" fill="#52514e">Personalizada</text>
+          <rect x="145" y="144" width="198" height="20" rx="4" fill="#2a78d6"/>
+          <text x="351" y="159" font-weight="700" fill="#0b0b0b">66,0%</text>
+        </g>
+        <g font-size="10.5" fill="#898781">
+          <text x="145" y="60">cada cliente recebe uma oferta qualquer</text>
+          <text x="145" y="120">todos recebem a oferta campeã do portfólio</text>
+          <text x="145" y="180">cada cliente recebe a oferta indicada pelo modelo</text>
+        </g>
+      </svg>
+    </div>
+    <div>
+      <p class="lead" style="margin-top:0">
+        No próprio teste, os envios que - por sorteio - coincidiram com a recomendação do modelo
+        converteram <b>66%</b>, contra <b>38,6%</b> da distribuição atual
+        (<b>+27 pontos, +71%</b>).
+      </p>
+      <p class="lead">
+        A personalização também supera a alternativa simples de mandar a
+        oferta campeã para todos (<b>62,8%</b>) - e, na prática, concentra os envios em ofertas
+        de <b>baixo custo</b>: mais de 95% das recomendações têm desconto de até R$ 3 ou custo
+        zero (informativas), em vez de gastar desconto alto com quem não precisa dele.
+      </p>
+      <p class="note">Comparação em 15,2 mil envios de teste, clientes fora do treinamento;
+      intervalo de confiança de 95% para o grupo recomendado: 63,6%–68,3%. Como o envio original
+      foi aleatório, os grupos são comparáveis (quase-experimento).</p>
+    </div>
+  </div>
+  <div class="pageno">4 / 5</div>
+</section>
+
+<!-- SLIDE 5 - projeção e próximos passos -->
+<section class="slide" id="s5">
+  <div class="kicker">Projeção e próximos passos</div>
+  <h2>O que isso significa em escala</h2>
+  <div class="tiles" style="margin-top:.4rem">
+    <div class="tile"><div class="num accent">+24 a 27 mil</div><div class="cap">conversões adicionais a cada 100 mil envios (de 38,6 mil para 63–66 mil)</div></div>
+    <div class="tile"><div class="num">R$ 32</div><div class="cap">gasto mediano do cliente durante a validade de uma oferta convertida - cada ponto de conversão movimenta receita</div></div>
+    <div class="tile"><div class="num">até 30%</div><div class="cap">da verba de descontos hoje ativada sem influência, endereçável com melhor direcionamento</div></div>
+  </div>
+  <div class="cols" style="margin-top:2.2rem">
+    <ol class="steps">
+      <li><div><b>Piloto A/B (2–4 semanas)</b>
+        <span>Política atual vs política do modelo em uma fração dos envios - confirma o ganho
+        em produção antes de escalar.</span></div></li>
+      <li><div><b>Régua de valor</b>
+        <span>Incorporar margem por pedido e custo de desconto à decisão: de "maximizar conversão"
+        para "maximizar retorno por envio", sem retreinar o modelo.</span></div></li>
+      <li><div><b>Evolução para incrementalidade</b>
+        <span>Com grupo de controle contínuo, medir o efeito causal de cada oferta (uplift) e
+        suspender envios a quem converteria sozinho.</span></div></li>
+    </ol>
+    <div class="panel">
+      <h3>Por que começar agora</h3>
+      <p>A solução usa dados que já coletamos, roda sobre o portfólio atual de ofertas e a régua de
+      decisão é auditável. O risco é controlado pelo piloto A/B - e o custo de esperar é seguir
+      convertendo ~39% dos envios onde a oferta certa converte ~66%, com 30% da verba de
+      desconto sem retorno.</p>
+    </div>
+  </div>
+  <div class="note">Estimativas baseadas no teste de 30 dias (17 mil clientes); números detalhados e
+  metodologia nos notebooks do repositório.</div>
+  <div class="pageno">5 / 5</div>
+</section>
+
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  const dots = [...document.querySelectorAll(".dots a")];
+  function current() {
+    return slides.findIndex(s => Math.abs(s.getBoundingClientRect().top) < window.innerHeight / 2);
+  }
+  document.addEventListener("keydown", e => {
+    const i = current();
+    if ((e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") && i < slides.length - 1) {
+      e.preventDefault(); slides[i + 1].scrollIntoView({ behavior: "smooth" });
+    }
+    if ((e.key === "ArrowUp" || e.key === "PageUp") && i > 0) {
+      e.preventDefault(); slides[i - 1].scrollIntoView({ behavior: "smooth" });
+    }
+  });
+  const obs = new IntersectionObserver(es => es.forEach(en => {
+    if (en.isIntersecting) {
+      const i = slides.indexOf(en.target);
+      dots.forEach((d, j) => d.classList.toggle("on", i === j));
+    }
+  }), { threshold: 0.6 });
+  slides.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

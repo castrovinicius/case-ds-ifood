@@ -32,7 +32,7 @@ para cada cliente** e estimar o impacto dessa política no negócio.
 |---|---|
 | 1. Notebook de processamento de dados (PySpark) | [notebooks/1_data_processing.ipynb](notebooks/1_data_processing.ipynb) |
 | 2. Notebook/script de modelagem (treino e avaliação) | [notebooks/2_modeling.ipynb](notebooks/2_modeling.ipynb) |
-| 3. Apresentação (máx. 5 slides, para lideranças) | [presentation/apresentacao.html](presentation/apresentacao.html) |
+| 3. Apresentação (máx. 5 slides, para lideranças) | [presentation/apresentacao.pdf](presentation/apresentacao.pdf) |
 
 Os notebooks estão versionados **já executados** (com outputs e gráficos), então os resultados
 podem ser avaliados sem rodar nada.
@@ -50,7 +50,7 @@ ifood-case/
 │   ├── 1_data_processing.ipynb  # limpeza, jornada da oferta, dataset unificado (PySpark)
 │   └── 2_modeling.ipynb         # EDA do target, modelo, política e impacto (scikit-learn)
 ├── presentation/
-│   └── apresentacao.html        # 5 slides para lideranças de negócio
+│   └── apresentacao.pdf         # 5 slides para lideranças de negócio
 ├── src/
 │   ├── spark_utils.py           # sessão Spark local + utilitários
 │   └── viz.py                   # estilo padrão dos gráficos
@@ -87,7 +87,7 @@ pinadas em [requirements.txt](requirements.txt). O pipeline é determinístico (
 re-executar reproduz os mesmos números. Qualidade de código: notebooks e `src/` passam por
 `ruff check` e `ruff format`.
 
-A apresentação ([presentation/apresentacao.html](presentation/apresentacao.html)) abre direto no
+A apresentação ([presentation/apresentacao.pdf](presentation/apresentacao.pdf)) abre direto no
 navegador. O case recomenda Databricks Community Edition; a solução roda localmente com PySpark
 puro e é portável para Databricks sem mudanças de lógica (a criação da sessão em
 `src/spark_utils.py` torna-se desnecessária lá).
@@ -107,3 +107,7 @@ puro e é portável para Databricks sem mudanças de lógica (a criação da ses
 
 As justificativas de cada decisão, as limitações (propensão != incrementalidade, recomendação de
 teste A/B) e os próximos passos estão detalhados nos notebooks.
+
+
+## Autor
+Vinícius Castro | [Linkedin](https://www.linkedin.com/in/castro-vini/)
